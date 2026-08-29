@@ -1,3 +1,5 @@
+import './styles/app.css';
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // Gestion du menu mobile
