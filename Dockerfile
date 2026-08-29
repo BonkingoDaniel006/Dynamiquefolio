@@ -26,3 +26,5 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data var/
 
 EXPOSE 80
+
+CMD ["./render-start.sh"]
