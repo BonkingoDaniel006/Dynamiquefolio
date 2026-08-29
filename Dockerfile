@@ -1,5 +1,5 @@
-# Image PHP 8.2 avec Apache
-FROM php:8.2-apache
+# Image PHP 8.3 avec Apache
+FROM php:8.3-apache
 
 # Installation des dépendances système et extensions PHP nécessaires
 RUN apt-get update && apt-get install -y \
@@ -21,6 +21,9 @@ COPY . .
 # Installation de Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
+
+# Compilation des assets (sécurité pour AssetMapper)
+RUN php bin/console assetmap:compile || true
 
 # Nettoyage des droits sur les dossiers de cache et logs
 RUN chown -R www-data:www-data var/
