@@ -24,8 +24,8 @@ COPY . .
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Compilation des assets (pour AssetMapper)
-RUN php bin/console assetmap:compile || true
+# Compilation des assets avec la bonne syntaxe (asset-map:compile)
+RUN php bin/console asset-map:compile
 
 # Droits sur le dossier cache/logs
 RUN chown -R www-data:www-data var/
