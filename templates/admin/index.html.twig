@@ -1,0 +1,383 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block body %}
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ asset('styles/dashboard.css') }}">
+    {% endblock %}
+    <div class="dashboard-shell">
+        <aside class="sidebar">
+            <a href="#" class="brand-logo">
+                <i class="fa-solid fa-angles-right"></i> Bokingofolio
+            </a>
+
+            <div class="sidebar-section-label">Navigation</div>
+            <nav class="sidebar-nav">
+                <button class="tab-btn active" onclick="switchTab('projects', this)"><i class="fa-solid fa-table-columns"></i> Tableau</button>
+                <button class="tab-btn" onclick="switchTab('messages', this)"><i class="fa-solid fa-envelope"></i> Messages</button>
+                <button class="tab-btn" onclick="switchTab('skills', this)"><i class="fa-solid fa-code"></i> Compétences</button>
+                <button class="tab-btn" onclick="switchTab('profile', this)"><i class="fa-solid fa-user"></i> Profil</button>
+                <a class="tab-btn" href="{{ path('app_logout') }}"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+            </nav>
+
+            <div class="sidebar-section-label">Système</div>
+            <nav class="sidebar-nav">
+                <button class="tab-btn" onclick="showToast('Documentation ouverte')"><i class="fa-solid fa-book"></i> Docs API</button>
+                <button class="tab-btn" onclick="showToast('Logs du serveur')"><i class="fa-solid fa-terminal"></i> Logs</button>
+            </nav>
+
+            <div class="sidebar-mini-card">
+                <div class="mini-label">Performance</div>
+                <div class="mini-stat">
+                    <span>Disponibilité</span>
+                    <span>72%</span>
+                </div>
+                <div class="mini-bar"><span></span></div>
+            </div>
+        </aside>
+
+        <div class="main-panel">
+            <header class="topbar">
+                <div class="topbar-kicker">Dashboard / Portfolio Admin</div>
+
+                <div class="topbar-actions">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Rechercher un projet, un message, une compétence...">
+                    </div>
+
+                    <div class="nav-actions">
+                        <a href="https://bokingofolio.onrender.com" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Voir le site</a>
+                        <a href="#">Support</a>
+                        <div class="user-avatar-btn" onclick="handleLogout()" title="Déconnexion">D</div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div class="hero-row">
+                    <div class="hero-block">
+                        <div class="hero-badge"><i class="fa-solid fa-sparkles"></i></div>
+                        <div>
+                            <strong>Bonjour Daniel</strong>
+                            <span>Dernière mise à jour il y a 2h</span>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-black" style="width: auto; padding: 12px 18px;" onclick="toggleNewProjectForm()">
+                        <i class="fa-solid fa-plus"></i> Ajouter un projet
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                            <div class="stat-pill">+12%</div>
+                        </div>
+                        <div class="value">08</div>
+                        <div class="label">Projets actifs</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+                            <div class="stat-pill">+4</div>
+                        </div>
+                        <div class="value">24</div>
+                        <div class="label">Messages reçus</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-icon"><i class="fa-solid fa-code"></i></div>
+                            <div class="stat-pill">Stable</div>
+                        </div>
+                        <div class="value">12</div>
+                        <div class="label">Technologies gérées</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-icon"><i class="fa-solid fa-bolt"></i></div>
+                            <div class="stat-pill">Live</div>
+                        </div>
+                        <div class="value">99.9%</div>
+                        <div class="label">Disponibilité</div>
+                    </div>
+                </div>
+
+                <section id="projects" class="section-pane active">
+                    <div class="page-header">
+                        <h1>Gestion des Projets</h1>
+                        <p>Retrouvez tous vos projets, suivez leur déploiement et accédez à leur configuration.</p>
+                    </div>
+
+                    <div class="list-grid">
+                        <div>
+                            <div id="new-project-card" class="form-card" style="display: none; margin-bottom: 18px;">
+                                <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 20px;">Nouveau Projet</h3>
+                                <form onsubmit="addProject(event)">
+                                    <div class="form-group">
+                                        <label>Titre du projet</label>
+                                        <input type="text" id="p-title" class="form-control" placeholder="ex: Elikya Marketplace" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Stack Technique</label>
+                                        <input type="text" id="p-tech" class="form-control" placeholder="Flask, MySQL, Docker" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <textarea id="p-desc" class="form-control" required></textarea>
+                                    </div>
+                                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                        <button type="button" class="btn btn-gray" style="width: auto;" onclick="toggleNewProjectForm()">Annuler</button>
+                                        <button type="submit" class="btn btn-black" style="width: auto;">Enregistrer</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="card-item">
+                                <div class="card-media">
+                                    <i class="fa-solid fa-store"></i>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card-ref">Projet n° 85737295</div>
+                                    <div class="card-title">Elikya — Marketplace e-Commerce</div>
+
+                                    <div class="tracker">
+                                        <div class="tracker-line"></div>
+                                        <div class="tracker-line-fill" style="width: 100%;"></div>
+                                        <div class="tracker-step">
+                                            <div class="dot active"></div>
+                                            <div class="step-label">Développement</div>
+                                            <div class="step-sub">30/08/2026</div>
+                                        </div>
+                                        <div class="tracker-step">
+                                            <div class="dot active"></div>
+                                            <div class="step-label">Tests</div>
+                                            <div class="step-sub">31/08/2026</div>
+                                        </div>
+                                        <div class="tracker-step">
+                                            <div class="dot active"></div>
+                                            <div class="step-label">En ligne</div>
+                                            <div class="step-sub">Render</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn btn-black" onclick="showToast('Ouverture de l\'éditeur de projet...')">Modifier</button>
+                                    <button class="btn btn-gray" onclick="showToast('Synchronisation Git lancée...')">Commits</button>
+                                    <button class="btn btn-outline" onclick="showToast('Lien démo copié')">Démo</button>
+                                </div>
+                            </div>
+
+                            <div class="card-item">
+                                <div class="card-media">
+                                    <i class="fa-solid fa-microchip"></i>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card-ref">Projet n° 85737294</div>
+                                    <div class="card-title">AUTISAFE — Bracelet connecté & QR Code d'urgence</div>
+
+                                    <div class="tracker">
+                                        <div class="tracker-line"></div>
+                                        <div class="tracker-line-fill" style="width: 50%;"></div>
+                                        <div class="tracker-step">
+                                            <div class="dot active"></div>
+                                            <div class="step-label">Conception</div>
+                                            <div class="step-sub">Effectué</div>
+                                        </div>
+                                        <div class="tracker-step">
+                                            <div class="dot active"></div>
+                                            <div class="step-label">Prototype</div>
+                                            <div class="step-sub">En cours</div>
+                                        </div>
+                                        <div class="tracker-step">
+                                            <div class="dot"></div>
+                                            <div class="step-label">Déploiement</div>
+                                            <div class="step-sub">À venir</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn btn-black" onclick="showToast('Édition du prototype...')">Modifier</button>
+                                    <button class="btn btn-gray">Suivre</button>
+                                    <button class="btn btn-outline">Spécifications</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mini-panel">
+                                <h3>Activité récente</h3>
+                                <div class="activity-list">
+                                    <div class="activity-item">
+                                        <div class="activity-flag"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
+                                        <div class="activity-copy">
+                                            <strong>Déploiement Elikya</strong>
+                                            <span>il y a 2 heures</span>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-flag"><i class="fa-solid fa-message"></i></div>
+                                        <div class="activity-copy">
+                                            <strong>3 nouveaux messages</strong>
+                                            <span>aujourd’hui</span>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-flag"><i class="fa-solid fa-diagram-project"></i></div>
+                                        <div class="activity-copy">
+                                            <strong>Nouveau projet ajouté</strong>
+                                            <span>hier</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mini-panel">
+                                <h3>Vue rapide</h3>
+                                <div class="activity-list">
+                                    <div class="activity-item">
+                                        <div class="activity-flag"><i class="fa-solid fa-rocket"></i></div>
+                                        <div class="activity-copy">
+                                            <strong>Livrables</strong>
+                                            <span>6 prêts pour publication</span>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-flag"><i class="fa-solid fa-clock"></i></div>
+                                        <div class="activity-copy">
+                                            <strong>Temps moyen</strong>
+                                            <span>3 jours par projet</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="messages" class="section-pane">
+                    <div class="page-header">
+                        <h1>Messages & Contact</h1>
+                        <p>Consultez les prises de contact reçues via le formulaire de votre portfolio.</p>
+                    </div>
+
+                    <div class="card-item">
+                        <div class="card-media" style="font-size: 1.7rem;">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-ref">Reçu le 30/08/2026 — De: Recrutement Tech</div>
+                            <div class="card-title">Proposition de mission / Alternance Master</div>
+                            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+                                "Bonjour Daniel, nous avons examiné vos projets Full-Stack et IoT. Nous souhaiterions échanger avec vous concernant..."
+                            </p>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-black" onclick="showToast('Réponse envoyée par mail')">Répondre</button>
+                            <button class="btn btn-outline" onclick="showToast('Message archivé')">Archiver</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="skills" class="section-pane">
+                    <div class="page-header">
+                        <h1>Compétences Techniques</h1>
+                        <p>Gérez vos langages, frameworks et outils affichés sur la page d'accueil.</p>
+                    </div>
+
+                    <div class="form-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 16px;">
+                            <h3 style="font-weight: 800;">Stack Backend & Frontend</h3>
+                            <button class="btn btn-black" style="width: auto;" onclick="showToast('Mise à jour des technos enregistrée')">Sauvegarder</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Langages Principaux</label>
+                            <input type="text" class="form-control" value="Python, PHP, JavaScript, C++ (Arduino/ESP32), SQL">
+                        </div>
+                        <div class="form-group">
+                            <label>Frameworks Web</label>
+                            <input type="text" class="form-control" value="Flask, Symfony, HTML5 / CSS3 / Tailwind CSS">
+                        </div>
+                    </div>
+                </section>
+
+                <section id="profile" class="section-pane">
+                    <div class="page-header">
+                        <h1>Profil & Portfolio</h1>
+                        <p>Mettez à jour vos informations personnelles et statuts d'activité.</p>
+                    </div>
+
+                    <div class="form-card">
+                        <form onsubmit="event.preventDefault(); showToast('Profil mis à jour !');">
+                            <div class="form-group">
+                                <label>Nom & Prénom</label>
+                                <input type="text" class="form-control" value="Daniel Botay">
+                            </div>
+                            <div class="form-group">
+                                <label>Titre</label>
+                                <input type="text" class="form-control" value="Développeur Full-Stack & Etudiant Computer Science">
+                            </div>
+                            <div class="form-group">
+                                <label>Statut de disponibilité</label>
+                                <select class="form-control">
+                                    <option selected>Disponible (Freelance / Alternance)</option>
+                                    <option>Occupé</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-black" style="width: auto;">Enregistrer les modifications</button>
+                        </form>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-text">Action effectuée</span>
+    </div>
+
+    <!-- JAVASCRIPT SIMPLE (VANILLA) -->
+    <script>
+        function switchTab(tabId, btnElement) {
+            // Désactiver tous les onglets
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.section-pane').forEach(pane => pane.classList.remove('active'));
+
+            // Activer le bon onglet
+            btnElement.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function toggleNewProjectForm() {
+            const card = document.getElementById('new-project-card');
+            card.style.display = card.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function handleLogout() {
+            if(confirm("Se déconnecter de la session d'administration ?")) {
+                showToast("Déconnexion en cours...");
+                setTimeout(() => location.reload(), 1000);
+            }
+        }
+
+        function addProject(e) {
+            e.preventDefault();
+            showToast("Nouveau projet enregistré avec succès !");
+            toggleNewProjectForm();
+        }
+    </script>
+
+{% endblock %}

@@ -1,0 +1,423 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}Log in!{% endblock %}
+
+{% block body %}
+
+
+ <style>
+        :root {
+            --bg-page: #f4f4f2;
+            --bg-card: #ffffff;
+            --bg-input: #f0f0ee;
+            --bg-sidebar: #111111;
+            --bg-sidebar-soft: #171717;
+            --text-primary: #111111;
+            --text-muted: #666666;
+            --text-light: #f5f5f3;
+            --border-subtle: #e7e6e3;
+            --accent-green: #00A8E8;
+            --accent-mint: #00A8E8;
+            --radius-card: 22px;
+            --radius-btn: 12px;
+            --shadow-card: 0 20px 50px rgba(17, 17, 17, 0.08);
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html, body {
+            min-height: 100%;
+            background: linear-gradient(135deg, #f3f3f1 0%, #ecece9 100%);
+            color: var(--text-primary);
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+        }
+
+        .login-shell {
+            width: min(1100px, 100%);
+            min-height: 720px;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(17,17,17,0.04);
+            border-radius: 28px;
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+
+        .login-visual {
+            background: linear-gradient(180deg, var(--bg-sidebar) 0%, var(--bg-sidebar-soft) 100%);
+            color: var(--text-light);
+            padding: 42px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .login-visual::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(0, 180, 230, 0.18), transparent 28%);
+            pointer-events: none;
+        }
+
+        .brand {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.08em;
+        }
+
+        .brand i {
+            color: var(--accent-mint);
+        }
+
+        .visual-content {
+            position: relative;
+            z-index: 1;
+            margin-top: 48px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 20px;
+        }
+
+        .visual-content h1 {
+            font-size: clamp(2.4rem, 3vw, 4rem);
+            line-height: 1;
+            letter-spacing: -0.08em;
+            margin-bottom: 18px;
+        }
+
+        .visual-content p {
+            max-width: 470px;
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .stats-box {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0,1fr));
+            gap: 14px;
+            margin-top: 34px;
+        }
+
+        .mini-stat {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 16px 14px;
+        }
+
+        .mini-stat strong {
+            display: block;
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+        }
+
+        .mini-stat span {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.62);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .login-panel {
+            background: rgba(255,255,255,0.72);
+            padding: 42px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            width: min(100%, 430px);
+        }
+
+        .login-header {
+            margin-bottom: 28px;
+        }
+
+        .login-header h2 {
+            font-size: clamp(1.9rem, 2vw, 2.5rem);
+            letter-spacing: -0.08em;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 0.96rem;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.84rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border-radius: 14px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-input);
+            font-size: 0.96rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.15s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--text-primary);
+            background: #ffffff;
+        }
+
+        .row-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 6px 0 22px;
+        }
+
+        .check-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .check-label input {
+            accent-color: var(--accent-green);
+            width: 14px;
+            height: 14px;
+        }
+
+        .link-text {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            border-radius: var(--radius-btn);
+            padding: 15px 18px;
+            font-size: 0.96rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--text-primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #222222;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0 18px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .secondary-btn {
+            background: #ffffff;
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .secondary-btn:hover {
+            background: #f8f8f7;
+        }
+
+        .register-copy {
+            margin-top: 22px;
+            text-align: center;
+            font-size: 0.86rem;
+            color: var(--text-muted);
+        }
+
+        .register-copy a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        @media (max-width: 860px) {
+            .login-shell {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+
+            .login-visual {
+                padding: 28px 22px 22px;
+            }
+
+            .login-panel {
+                padding: 28px 22px 34px;
+            }
+
+            .stats-box {
+                grid-template-columns: repeat(3, minmax(0,1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-shell">
+        <aside class="login-visual">
+            <div class="brand">
+                <i class="fa-solid fa-angles-right"></i>
+                <span>Bokingofolio</span>
+            </div>
+
+            <div class="visual-content">
+                <div class="eyebrow">Portfolio admin</div>
+                <h1>Accédez à votre espace</h1>
+                <p>
+                    Gérez vos projets, suivez les messages et gardez votre portfolio à jour depuis un tableau de bord centralisé.
+                </p>
+
+                <div class="stats-box">
+                    <div class="mini-stat">
+                        <strong>08</strong>
+                        <span>Projets</span>
+                    </div>
+                    <div class="mini-stat">
+                        <strong>24</strong>
+                        <span>Messages</span>
+                    </div>
+                    <div class="mini-stat">
+                        <strong>99.9%</strong>
+                        <span>Uptime</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="login-panel">
+            <div class="login-card">
+                <div class="login-header">
+                    <h2>Connexion</h2>
+                    <p>Bienvenue dans votre espace d’administration.</p>
+                </div>
+
+                <form method="post">
+                    {% if error %}
+                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                    {% endif %}
+
+                    {% if app.user %}
+                        <div class="mb-3">
+                            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Logout</a>
+                        </div>
+                    {% endif %}
+                    <div class="form-group">
+                        <label for="email">Adresse e-mail</label>
+                        <div class="input-wrap">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" value="{{ last_username }}" name="email" id="inputEmail"   class="form-control"  autocomplete="email" placeholder="daniel@bokingofolio.fr" required autofocus >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <div class="input-wrap">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" placeholder="••••••••" required>
+                        </div>
+                    </div>
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+
+                    
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        Se connecter
+                    </button>
+
+                    
+                </form>
+
+              
+            </div>
+        </main>
+    </div>
+{% endblock %}

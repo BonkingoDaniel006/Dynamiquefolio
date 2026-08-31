@@ -15,4 +15,12 @@ final class PortfolioController extends AbstractController
             'controller_name' => 'PortfolioController',
         ]);
     }
+
+    #[Route('/dashboard', name: 'dashboard')]
+    public function dashboard(): Response
+    {
+        return $this->render('admin/index.html.twig', [
+            'controller_name' => 'PortfolioController',
+        ]);
+    }
 }
