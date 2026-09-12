@@ -1,4 +1,5 @@
 
+import './stimulus_bootstrap.js';
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -6,9 +7,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const navToggle = document.querySelector('.nav-toggle');
     const navLinks = document.querySelector('.nav-links');
 
-    navToggle.addEventListener('click', () => {
-        navLinks.classList.toggle('open');
-    });
+    if (navToggle && navLinks) {
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+        });
+    }
 
     // Gestion des filtres de projets
     const filterButtons = document.querySelectorAll('.project-nav .btn');

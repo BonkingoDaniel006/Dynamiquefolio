@@ -311,24 +311,40 @@
                     </div>
 
                     <div class="form-card">
-                        <form onsubmit="event.preventDefault(); showToast('Profil mis à jour !');">
-                            <div class="form-group">
-                                <label>Nom & Prénom</label>
-                                <input type="text" class="form-control" value="Daniel Botay">
-                            </div>
-                            <div class="form-group">
-                                <label>Titre</label>
-                                <input type="text" class="form-control" value="Développeur Full-Stack & Etudiant Computer Science">
-                            </div>
-                            <div class="form-group">
-                                <label>Statut de disponibilité</label>
-                                <select class="form-control">
-                                    <option selected>Disponible (Freelance / Alternance)</option>
-                                    <option>Occupé</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-black" style="width: auto;">Enregistrer les modifications</button>
-                        </form>
+                        {% if profileForm %}
+                            {{ form_start(profileForm, {attr: {class: 'profile-form'}}) }}
+                                <div class="form-group">
+                                    {{ form_row(profileForm.prenom, {label: 'Prénom', attr: {class: 'form-control'}}) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_row(profileForm.nom, {label: 'Nom', attr: {class: 'form-control'}}) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_row(profileForm.titre, {label: 'Titre', attr: {class: 'form-control'}}) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_row(profileForm.bio, {label: 'Biographie', attr: {class: 'form-control'}}) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_row(profileForm.about_me, {label: 'À propos', attr: {class: 'form-control'}}) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_row(profileForm.objectif, {label: 'Objectif', attr: {class: 'form-control'}}) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_row(profileForm.photo, {label: 'Photo', attr: {class: 'form-control'}}) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_row(profileForm.cv, {label: 'CV', attr: {class: 'form-control'}}) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_row(profileForm.disponibilite, {label: 'Disponibilité', attr: {class: 'form-control'}}) }}
+                                </div>
+                                <button type="submit" class="btn btn-black" style="width: auto;">Enregistrer les modifications</button>
+                            {{ form_end(profileForm) }}
+                        {% else %}
+                            <p>Aucun profil n’est encore enregistré.</p>
+                        {% endif %}
                     </div>
                 </section>
             </main>
