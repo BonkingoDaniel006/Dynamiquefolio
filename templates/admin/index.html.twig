@@ -290,17 +290,29 @@
 
                     <div class="form-card">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 16px;">
-                            <h3 style="font-weight: 800;">Stack Backend & Frontend</h3>
-                            <button class="btn btn-black" style="width: auto;" onclick="showToast('Mise à jour des technos enregistrée')">Sauvegarder</button>
+                            <h3 style="font-weight: 800;">Liste des competences</h3>
+                            {% if competenceForm %}
+                                <button type="button" class="btn btn-black" style="width: auto;" onclick="openCompetenceModal()"><i class="fa-solid fa-plus"></i> Ajouter une compétence</button>
+                            {% endif %}
                         </div>
                         <div class="form-group">
-                            <label>Langages Principaux</label>
-                            <input type="text" class="form-control" value="Python, PHP, JavaScript, C++ (Arduino/ESP32), SQL">
+                           {% for competence in competences %}
+                                <div class="skill-item" data-competence-id="{{ competence.id }}">
+                                    <i class="{{ competence.logo }}"></i>
+                                    <span>{{ competence.nom }}</span>
+                                    <div class="skill-actions">
+                                        <button type="button" class="skill-menu-toggle" aria-label="Actions pour {{ competence.nom }}" aria-expanded="false" onclick="toggleCompetenceMenu(event, {{ competence.id }})">
+                                            <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                                        </button>
+                                        <div id="competence-menu-{{ competence.id }}" class="skill-actions-menu" hidden>
+                                            <button type="button" onclick="openCompetenceEditModal({{ competence.id }})"><i class="fa-solid fa-pen" aria-hidden="true"></i> Modifier</button>
+                                            <button type="button" class="is-danger" onclick="openCompetenceDeleteModal({{ competence.id }})"><i class="fa-solid fa-trash" aria-hidden="true"></i> Supprimer</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
-                        <div class="form-group">
-                            <label>Frameworks Web</label>
-                            <input type="text" class="form-control" value="Flask, Symfony, HTML5 / CSS3 / Tailwind CSS">
-                        </div>
+
                     </div>
                 </section>
 
@@ -351,6 +363,69 @@
         </div>
     </div>
 
+    {% if competenceForm %}
+        <div id="competence-modal" class="dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="competence-modal-title" hidden>
+            <div class="dashboard-modal-content">
+                <button type="button" class="dashboard-modal-close" onclick="closeCompetenceModal()" aria-label="Fermer">&times;</button>
+                <h2 id="competence-modal-title">Ajouter une compétence</h2>
+                <p class="dashboard-modal-intro">Ajoutez une technologie à votre portfolio.</p>
+                {{ form_start(competenceForm, {attr: {id: 'competence-form'}}) }}
+                    {{ form_row(competenceForm.nom, {label: 'Nom', attr: {class: 'form-control', required: true}}) }}
+                    {{ form_row(competenceForm.logo, {label: 'Classe de l’icône', attr: {class: 'form-control', placeholder: 'devicon-php-plain'}}) }}
+                    {{ form_widget(competenceForm.id_profil) }}
+                    <div class="dashboard-modal-actions">
+                        <button type="button" class="btn btn-gray" onclick="closeCompetenceModal()">Annuler</button>
+                        <button type="submit" class="btn btn-black">Enregistrer</button>
+                    </div>
+                {{ form_end(competenceForm) }}
+            </div>
+        </div>
+    {% endif %}
+
+    {% for competence in competences %}
+        {% set editForm = competenceForms[competence.id] %}
+        <div id="competence-edit-modal-{{ competence.id }}" class="dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="competence-edit-title-{{ competence.id }}" hidden>
+            <div class="dashboard-modal-content">
+                <button type="button" class="dashboard-modal-close" onclick="closeCompetenceEditModal({{ competence.id }})" aria-label="Fermer">&times;</button>
+                <h2 id="competence-edit-title-{{ competence.id }}">Modifier la compétence</h2>
+                <p class="dashboard-modal-intro">Mettez à jour les informations de cette compétence.</p>
+                {{ form_start(editForm, {attr: {class: 'competence-edit-form', 'data-competence-id': competence.id}}) }}
+                    {{ form_row(editForm.nom, {label: 'Nom', attr: {class: 'form-control', required: true}}) }}
+                    {{ form_row(editForm.logo, {label: 'Classe de l’icône', attr: {class: 'form-control'}}) }}
+                    {{ form_widget(editForm.id_profil) }}
+                    <div class="dashboard-modal-actions">
+                        <button type="button" class="btn btn-gray" onclick="closeCompetenceEditModal({{ competence.id }})">Annuler</button>
+                        <button type="submit" class="btn btn-black">Enregistrer</button>
+                    </div>
+                {{ form_end(editForm) }}
+            </div>
+        </div>
+
+        <div id="competence-delete-modal-{{ competence.id }}" class="dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="competence-delete-title-{{ competence.id }}" hidden>
+            <div class="dashboard-modal-content dashboard-result-modal">
+                <div class="dashboard-result-icon is-warning" aria-hidden="true">!</div>
+                <h2 id="competence-delete-title-{{ competence.id }}">Supprimer la compétence ?</h2>
+                <p class="dashboard-modal-intro">Cette action supprimera « {{ competence.nom }} » définitivement.</p>
+                <form class="competence-delete-form" action="{{ path('app_competences_delete', {id: competence.id}) }}" method="post" data-competence-id="{{ competence.id }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ competence.id) }}">
+                    <div class="dashboard-modal-actions">
+                        <button type="button" class="btn btn-gray" onclick="closeCompetenceDeleteModal({{ competence.id }})">Annuler</button>
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div id="competence-result-modal" class="dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="competence-result-title" hidden>
+        <div class="dashboard-modal-content dashboard-result-modal">
+            <div id="competence-result-icon" class="dashboard-result-icon" aria-hidden="true"></div>
+            <h2 id="competence-result-title">Résultat</h2>
+            <p id="competence-result-message"></p>
+            <button type="button" class="btn btn-black" onclick="closeCompetenceResult()">Fermer</button>
+        </div>
+    </div>
+
     <div id="toast" class="toast">
         <i class="fa-solid fa-circle-check"></i>
         <span id="toast-text">Action effectuée</span>
@@ -380,6 +455,108 @@
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
+        }
+
+        function openCompetenceModal() {
+            const modal = document.getElementById('competence-modal');
+            if (modal) {
+                modal.hidden = false;
+                modal.querySelector('input[name$="[nom]"]')?.focus();
+            }
+        }
+
+        function closeCompetenceModal() {
+            const modal = document.getElementById('competence-modal');
+            if (modal) {
+                modal.hidden = true;
+            }
+        }
+
+        function toggleCompetenceMenu(event, id) {
+            event.stopPropagation();
+            const menu = document.getElementById(`competence-menu-${id}`);
+            const button = event.currentTarget;
+            document.querySelectorAll('.skill-actions-menu').forEach(item => {
+                if (item !== menu) item.hidden = true;
+            });
+            document.querySelectorAll('.skill-menu-toggle').forEach(item => item.setAttribute('aria-expanded', 'false'));
+            menu.hidden = !menu.hidden;
+            button.setAttribute('aria-expanded', String(!menu.hidden));
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.skill-actions-menu').forEach(menu => menu.hidden = true);
+            document.querySelectorAll('.skill-menu-toggle').forEach(button => button.setAttribute('aria-expanded', 'false'));
+        });
+
+        function openCompetenceEditModal(id) {
+            document.getElementById(`competence-menu-${id}`).hidden = true;
+            document.getElementById(`competence-edit-modal-${id}`).hidden = false;
+        }
+
+        function closeCompetenceEditModal(id) {
+            document.getElementById(`competence-edit-modal-${id}`).hidden = true;
+        }
+
+        function openCompetenceDeleteModal(id) {
+            document.getElementById(`competence-menu-${id}`).hidden = true;
+            document.getElementById(`competence-delete-modal-${id}`).hidden = false;
+        }
+
+        function closeCompetenceDeleteModal(id) {
+            document.getElementById(`competence-delete-modal-${id}`).hidden = true;
+        }
+
+        function openCompetenceResult(success, message) {
+            const modal = document.getElementById('competence-result-modal');
+            const icon = document.getElementById('competence-result-icon');
+            document.getElementById('competence-result-title').textContent = success ? 'Compétence ajoutée' : 'Échec de l’ajout';
+            document.getElementById('competence-result-message').textContent = message;
+            icon.textContent = success ? '✓' : '!';
+            icon.className = `dashboard-result-icon ${success ? 'is-success' : 'is-error'}`;
+            modal.hidden = false;
+        }
+
+        function closeCompetenceResult() {
+            document.getElementById('competence-result-modal').hidden = true;
+            if (document.getElementById('competence-result-icon').classList.contains('is-success')) {
+                window.location.reload();
+            }
+        }
+
+        document.getElementById('competence-form')?.addEventListener('submit', async function(event) {
+            await submitCompetenceForm(event, closeCompetenceModal);
+        });
+
+        document.querySelectorAll('.competence-edit-form').forEach(form => {
+            form.addEventListener('submit', event => submitCompetenceForm(event, () => closeCompetenceEditModal(form.dataset.competenceId)));
+        });
+
+        document.querySelectorAll('.competence-delete-form').forEach(form => {
+            form.addEventListener('submit', event => submitCompetenceForm(event, () => closeCompetenceDeleteModal(form.dataset.competenceId)));
+        });
+
+        async function submitCompetenceForm(event, closeModal) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                });
+                const result = await response.json();
+                closeModal();
+                openCompetenceResult(response.ok && result.success, result.message);
+            } catch (error) {
+                closeModal();
+                openCompetenceResult(false, 'Une erreur réseau est survenue.');
+            } finally {
+                submitButton.disabled = false;
+            }
         }
 
         function handleLogout() {

@@ -6,6 +6,7 @@ use App\Entity\Competences;
 use App\Form\CompetencesType;
 use App\Repository\CompetencesRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,8 +37,27 @@ class CompetencesController extends AbstractController
             $entityManager->persist($competence);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Article créé avec succès.');
-            return $this->redirectToRoute('app_article_index');
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => 'La compétence a été ajoutée avec succès.',
+                ], Response::HTTP_CREATED);
+            }
+
+            $this->addFlash('success', 'Compétence créée avec succès.');
+            return $this->redirectToRoute('dashboard');
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+
+            return new JsonResponse([
+                'success' => false,
+                'message' => $errors[0] ?? 'Le formulaire contient une erreur.',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return $this->render('competences/new.html.twig', [
@@ -64,8 +84,27 @@ class CompetencesController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            $this->addFlash('success', 'Article mis à jour.');
-            return $this->redirectToRoute('app_article_index');
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => 'La compétence a été modifiée avec succès.',
+                ]);
+            }
+
+            $this->addFlash('success', 'Compétence mise à jour.');
+            return $this->redirectToRoute('dashboard');
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+
+            return new JsonResponse([
+                'success' => false,
+                'message' => $errors[0] ?? 'Le formulaire contient une erreur.',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return $this->render('competences/edit.html.twig', [
@@ -78,10 +117,23 @@ class CompetencesController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function delete(Request $request, Competences $competence, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$article->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($article);
+        if ($this->isCsrfTokenValid('delete'.$competence->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($competence);
             $entityManager->flush();
-            $this->addFlash('success', 'Article supprimé.');
+
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => 'La compétence a été supprimée avec succès.',
+                ]);
+            }
+
+            $this->addFlash('success', 'Compétence supprimée.');
+        } elseif ($request->isXmlHttpRequest()) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Le jeton de sécurité est invalide.',
+            ], Response::HTTP_FORBIDDEN);
         }
 
         return $this->redirectToRoute('app_competences_index', [], Response::HTTP_SEE_OTHER);
