@@ -15,6 +15,7 @@ class ProfilType extends AbstractType
             ->add('prenom')
             ->add('nom')
             ->add('titre')
+            ->add('etablissement')
             ->add('bio')
             ->add('about_me')
             ->add('objectif')

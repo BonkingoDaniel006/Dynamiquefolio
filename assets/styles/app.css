@@ -199,6 +199,45 @@ a {
     margin-bottom: 24px;
 }
 
+.availability-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 28px;
+    padding: 8px 13px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--white);
+    font-size: 0.9rem;
+}
+
+.availability-dot {
+    width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    border-radius: 50%;
+}
+
+.availability-status.is-available .availability-dot {
+    background: #63D471;
+    box-shadow: 0 0 0 4px rgba(99, 212, 113, 0.16);
+}
+
+.availability-status.is-unavailable .availability-dot {
+    background: #FF6B6B;
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.16);
+}
+
+.availability-label {
+    color: #C8D5DC;
+}
+
+.availability-status strong {
+    color: var(--white);
+    font-weight: 600;
+}
+
 .hero-actions {
     display: flex;
     gap: 16px;

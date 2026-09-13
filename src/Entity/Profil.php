@@ -22,6 +22,9 @@ class Profil
     #[ORM\Column(length: 255)]
     private ?string $titre = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $etablissement = null;
+
     #[ORM\Column(length: 500)]
     private ?string $bio = null;
 
@@ -77,6 +80,18 @@ class Profil
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
+
+        return $this;
+    }
+
+    public function getEtablissement(): ?string
+    {
+        return $this->etablissement;
+    }
+
+    public function setEtablissement(string $etablissement): static
+    {
+        $this->etablissement = $etablissement;
 
         return $this;
     }

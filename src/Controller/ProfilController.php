@@ -48,10 +48,9 @@ class ProfilController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_profil_show', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
     public function show(Profil $profil): Response
     {
-        return $this->render('profil/show.html.twig', [
+        return $this->render('portfolio/index.html.twig', [
             'profil' => $profil,
         ]);
     }
