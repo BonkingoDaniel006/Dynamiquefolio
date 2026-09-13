@@ -79,28 +79,12 @@
             <div class="container hidden">
                 <h2 class="section-title section-title-center">Compétences</h2>
                 <div class="skills-grid-new">
-                    <div class="skill-item"><i class="devicon-html5-plain"></i><span>HTML5</span></div>
-                    <div class="skill-item"><i class="devicon-css3-plain"></i><span>CSS3</span></div>
-                    <div class="skill-item"><i class="devicon-javascript-plain"></i><span>JavaScript</span></div>
-                    <div class="skill-item"><i class="devicon-python-plain"></i><span>Python</span></div>
-                    <div class="skill-item"><i class="devicon-django-plain"></i><span>Django</span></div>
-                    <div class="skill-item"><i class="devicon-flask-original"></i><span>Flask</span></div>
-                    <div class="skill-item"><i class="devicon-php-plain"></i><span>PHP</span></div>
-                    <div class="skill-item"><i class="devicon-symfony-original"></i><span>Symfony</span></div>
-                    <div class="skill-item"><i class="devicon-mysql-plain"></i><span>MySQL</span></div>
-                    <div class="skill-item"><i class="devicon-postgresql-plain"></i><span>PostgreSQL</span></div>
-                    <div class="skill-item"><i class="devicon-linux-plain"></i><span>Linux</span></div>
-                    <div class="skill-item"><i class="devicon-ubuntu-plain"></i><span>Ubuntu</span></div>
-                    <div class="skill-item"><i class="devicon-debian-plain"></i><span>Debian</span></div>
-                    <div class="skill-item"><i class="devicon-git-plain"></i><span>Git</span></div>
-                    <div class="skill-item"><i class="devicon-github-original"></i><span>GitHub</span></div>
-                    <div class="skill-item"><i class="devicon-cplusplus-plain"></i><span>C++</span></div>
-                    <div class="skill-item"><i class="devicon-arduino-plain"></i><span>Arduino</span></div>
-                    <!-- Icônes Font Awesome pour les technologies non présentes dans Devicon -->
-                    <div class="skill-item"><i class="fa-solid fa-server"></i><span>Proxmox VE</span></div>
-                    <div class="skill-item"><i class="fa-solid fa-cubes"></i><span>VMware</span></div>
-                    <div class="skill-item"><i class="fa-solid fa-gamepad"></i><span>Pygame</span></div>
-                    <div class="skill-item"><i class="fa-solid fa-database"></i><span>phpMyAdmin</span></div>
+                    {% for competence in competences %}
+                        <div class="skill-item">
+                            <i class="{{ competence.logo }}"></i>
+                            <span>{{ competence.nom }}</span>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </section>

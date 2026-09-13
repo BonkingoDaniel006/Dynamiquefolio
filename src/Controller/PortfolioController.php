@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Form\ProfilType;
+use App\Repository\CompetencesRepository;
 use App\Repository\ProfilRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,13 +15,15 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class PortfolioController extends AbstractController
 {
     #[Route('/', name: 'app_portfolio')]
-    public function index(ProfilRepository $profilRepository): Response
+    public function index(ProfilRepository $profilRepository, CompetencesRepository $competencesRepository): Response
     {
         $profil = $profilRepository->findOneBy([], ['id' => 'ASC']);
+        $competences = $competencesRepository->findAll();
 
         return $this->render('portfolio/index.html.twig', [
             'controller_name' => 'PortfolioController',
             'profil' => $profil,
+            'competences' => $competences,
         ]);
     }
 
