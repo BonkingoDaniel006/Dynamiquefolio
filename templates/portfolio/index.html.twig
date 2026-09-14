@@ -23,7 +23,7 @@
             <div class="hero-text hidden">
                 <p class="hero-tagline">{{ profil.titre }}</p>
                 <p class="hero-tagline">A {{ profil.etablissement }}</p>
-                <h1 >{{ profil.prenom }}<span>{{ profil.nom }}</span></h1>
+                <h1 >{{ profil.prenom }}<span> {{ profil.nom }}</span></h1>
                 <p class="hero-subtitle">
                     {{ profil.bio }}
                 </p>
@@ -94,11 +94,13 @@
             <div class="container hidden">
                 <h2 class="section-title">Parcours & expériences</h2>
                 <div class="timeline">
+                    
+                    {% for p in parcours %}
                     <div class="timeline-item ">
                         <div class="timeline-dot"></div>
                         <div class="timeline-content">
-                            <h3>Baccalauréat en Electronique Industrielle</h3>
-                            <p class="timeline-sub">Septembre 2021 – Juillet 2025 · Institut Technique Salama-Don Bosco - Lubumbashi, RDC</p>
+                            <h3>{{ p.titre }}</h3>
+                            <p class="timeline-sub"> {{ p.debut|date('m/Y') }} – {{ p.fin|date('m/Y') }} · {{ p.entite}} - {{ p.localisation }}</p>
                             <p>
                                 <li>Cours en Electricité</li>
                                 <li>Cours en Electronique</li>
@@ -110,41 +112,8 @@
                             </p>
                         </div>
                     </div>
-
-                    <div class="timeline-item ">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <h3>Technicien de maintenance - Stage</h3>
-                            <p class="timeline-sub">Fevrier 2025 – Avril 2025 · Societé Nationale des Chemins de Fer du Congo – Lubumbashi, RDC</p>
-                            <p>
-                                <li>Maintenance des équipements électriques</li>
-                                <li>Maintenance des équipements électroniques</li>
-                                <li>Rédaction d'un rapport de stage</li>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item ">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <h3>Bachelor en Administration système DevOps</h3>
-                            <p class="timeline-sub">Janvier 2026 - Aujourd'hui · Ecole-it, Valenciennes, France</p>
-                            <p>
-                                <li>Python</li>
-                                <li>HTML</li>
-                                <li>CSS</li>
-                                <li>JavaScript</li>
-                                <li>PHP</li>
-                                <li>Programmation Orientée Objet</li>
-                                <li>MySQL</li>
-                                <li>Git</li>
-                                <li>Linux</li>
-                                <li>Windows</li>
-                                <li>Administration système(Windows & Linux)</li>
-
-                            </p>
-                        </div>
-                    </div>
+                        
+                    {% endfor %}
                     
                 </div>
             </div>
