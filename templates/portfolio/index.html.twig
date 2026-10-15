@@ -1,120 +1,53 @@
-{% extends 'base.html.twig' %}
-
-{% block body %}
-    <header class="hero" id="top">
-        <nav class="navbar">
-            <div class="logo">D<span>B</span></div>
-            <ul class="nav-links">
-                <li><a href="#about">À propos</a></li>
-                <li><a href="#skills">Compétences</a></li>
-                <li><a href="#experience">Expériences</a></li>
-                <li><a href="#projects">Projets</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <button class="nav-toggle" aria-label="Menu">
-                <span></span><span></span><span></span>
-            </button>
-        </nav>
-
-        <div class="hero-content">
-            <div class="hero-image">
-                <img src="{{ asset('images/identity.png') }}" alt="Photo de Daniel Bokingo">
-            </div>
-            <div class="hero-text hidden">
-                <p class="hero-tagline">{{ profil.titre }}</p>
-                <p class="hero-tagline">A {{ profil.etablissement }}</p>
-                <h1 >{{ profil.prenom }}<span> {{ profil.nom }}</span></h1>
-                <p class="hero-subtitle">
-                    {{ profil.bio }}
-                </p>
-                <div class="availability-status {{ profil.disponibilite|lower == 'disponible' ? 'is-available' : 'is-unavailable' }}" role="status" aria-label="Disponibilité : {{ profil.disponibilite }}">
-                    <span class="availability-dot" aria-hidden="true"></span>
-                    <span class="availability-label">Disponibilité</span>
-                    <strong>{{ profil.disponibilite }}</strong>
-                </div>
-                <div class="hero-actions">
-                    <a href="#contact" class="btn primary">Me contacter</a>
-                    <a href="#skills" class="btn ghost">Voir mes compétences</a>
-                    <a href="bokingo_etudiant.pdf" class="btn ghost" download="bokingo_etudiant.pdf">Télécharger CV</a>
-                </div>
-            </div>
-        </div>
-    </header>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Portfolio – {{ profil ? profil.prenom ~ ' ' ~ profil.nom : 'Daniel Bokingo' }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ asset('portfolio/style.css?v=database-content-1') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    {% include 'portfolio/header.html.twig' %}
 
     <main>
-        <!-- À propos -->
-        <section id="about" class="section section-light">
-            <div class="container hidden">
-                <h2 class="section-title">À propos de moi</h2>
-                <div class="grid-2">
-                    <div >
-                        <p>
-    {{ profil.aboutMe}}</p>
-                        <br>
-                        <p>
-                            J’aime analyser les besoins, lire, écouter de la musique, Jouer au Basket-ball. Mon ambition est de travailler
-                            dans une entreprise moderne, orientée vers le bien-être et qui me permettra d'exploiter l'intégralité de mes compétences.
-                        </p>
-                        
-                    </div>
-                    <div class="about-highlight ">
-                           <h3>Mon objectif</h3>
-                        <p>
-                            {{ profil.objectif}}
-                        </p>
-                        <ul class="tags">
-                            <li>Développeur Backend</li>
-                            <li>Administrateur système DevOps</li>
-                            <li>Sécurité</li>
-                            <li>Architecture Backend</li>
-                            <li>IoT</li>
-                        </ul>
+        {% if profil and (profil.aboutMe or profil.objectif) %}
+            <section id="about" class="section section-light">
+                <div class="container hidden">
+                    <h2 class="section-title">À propos de moi</h2>
+                    <div class="grid-2">
+                        {% if profil.aboutMe %}
+                            <div>{{ profil.aboutMe|nl2br }}</div>
+                        {% endif %}
+                        {% if profil.objectif %}
+                            <div class="about-highlight">
+                                <h3>Mon objectif</h3>
+                                <p>{{ profil.objectif|nl2br }}</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        {% endif %}
 
         <!-- Compétences -->
-        <section id="skills" class="section section-dark">
+        <section id="skills" class="section section-light">
             <div class="container hidden">
                 <h2 class="section-title section-title-center">Compétences</h2>
+                <div class="skill-filter-nav" aria-label="Filtrer les compétences"></div>
                 <div class="skills-grid-new">
                     {% for competence in competences %}
                         <div class="skill-item">
-                            <i class="{{ competence.logo }}"></i>
+                            <i class="{{ competence.logo }}" aria-hidden="true"></i>
                             <span>{{ competence.nom }}</span>
                         </div>
+                    {% else %}
+                        <p>Aucune compétence n’est renseignée pour le moment.</p>
                     {% endfor %}
-                </div>
-            </div>
-        </section>
-
-        <!-- Parcours & expériences -->
-        <section id="experience" class="section section-light">
-            <div class="container hidden">
-                <h2 class="section-title">Parcours & expériences</h2>
-                <div class="timeline">
-                    
-                    {% for p in parcours %}
-                    <div class="timeline-item ">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <h3>{{ p.titre }}</h3>
-                            <p class="timeline-sub"> {{ p.debut|date('m/Y') }} – {{ p.fin|date('m/Y') }} · {{ p.entite}} - {{ p.localisation }}</p>
-                            <p>
-                                <li>Cours en Electricité</li>
-                                <li>Cours en Electronique</li>
-                                <li>Cours en Circuits Logique & Automation</li>
-                                <li>Cours en Schéma Electrique</li>
-                                <li>Cours en Schéma Electronique</li>
-                                <li>TP en Electricité des Bâtiments</li>
-                                <li>Tp en Electronique</li>
-                            </p>
-                        </div>
-                    </div>
-                        
-                    {% endfor %}
-                    
                 </div>
             </div>
         </section>
@@ -122,170 +55,99 @@
         <section id="projects" class="section section-dark">
             <div class="container hidden">
                 <h2 class="section-title section-title-center">Projets</h2>
-                <div class="project-nav">
+                <div class="project-nav" aria-label="Filtrer les projets">
                     <!-- Les boutons de filtre sont maintenant gérés en JS, pas besoin de les modifier ici -->
                 </div>
 
                 <div class="projects-grid">
-                    <div class="project-card" data-category="web"
-                        data-title="Portfolio Personnel"
-                        data-description="Création d'un portfolio personnel pour présenter mes compétences, expériences et projets."
-                        data-media="https://picsum.photos/seed/portfolio/800/600, https://picsum.photos/seed/portfolio2/800/600">
-                        <img src="https://picsum.photos/seed/portfolio/400/300" alt="Portfolio" class="project-image">
-                        <div class="project-overlay">
-                            <h3>Portfolio Personnel</h3>
-                            <button class="btn ghost open-modal-btn">Voir le projet</button>
-                        </div>
-                    </div>
-
-                    <div class="project-card" data-category="desktop"
-                        data-title="MarketLog"
-                        data-description="MarketLog est une application de gestion de stock simple et efficace. Elle permet de vendre, réapprovisionner, consulter les prix et visualiser le stock en temps réel. Les données sont enregistrées dans un fichier CSV, assurant une base fiable et persistante entre chaque utilisation."
-                        data-media="https://picsum.photos/seed/marketlog/800/600, https://picsum.photos/seed/marketlog2/800/600">
-                        <img src="https://picsum.photos/seed/marketlog/400/300" alt="MarketLog" class="project-image">
-                        <div class="project-overlay">
-                            <h3>MarketLog</h3>
-                            <button class="btn ghost open-modal-btn">Voir le projet</button>
-                        </div>
-                    </div>
-
-                    <div class="project-card" data-category="desktop"
-                        data-title="Jeu du serpent en python"
-                        data-description="Création d'un jeu simple en 2D utilisant Pygame & Turtle, mettant en pratique les concepts de programmation Pygame & Turtle."
-                        data-media="https://picsum.photos/seed/snakegame/800/600, https://picsum.photos/seed/snakegame2/800/600">
-                        <img src="https://picsum.photos/seed/snakegame/400/300" alt="Jeu du serpent" class="project-image">
-                        <div class="project-overlay">
-                            <h3>Jeu du serpent en python</h3>
-                            <button class="btn ghost open-modal-btn">Voir le projet</button>
-                        </div>
-                    </div>
-
-                    <div class="project-card" data-category="web"
-                        data-title="E-quiz"
-                        data-description="Application type Kahoot, quiz interactif multi‑joueurs avec interface web, gestion des questions, scores et sessions."
-                        data-media="https://picsum.photos/seed/equiz/800/600, https://picsum.photos/seed/equiz2/800/600">
-                        <img src="https://picsum.photos/seed/equiz/400/300" alt="E-quiz" class="project-image">
-                        <div class="project-overlay">
-                            <h3>E-quiz</h3>
-                            <button class="btn ghost open-modal-btn">Voir le projet</button>
-                        </div>
-                    </div>
-
-                    <div class="project-card" data-category="web"
-                        data-title="Bistrot Le Resto"
-                        data-description="Bistrot Le Rétro est un site web gastronomique présentant un restaurant lillois fusionnant cuisine traditionnelle et saveurs contemporaines."
-                        data-media="https://picsum.photos/seed/bistrot/800/600, https://picsum.photos/seed/bistrot2/800/600">
-                        <img src="https://picsum.photos/seed/bistrot/400/300" alt="Bistrot Le Resto" class="project-image">
-                        <div class="project-overlay">
-                            <h3>Bistrot Le Resto</h3>
-                            <button class="btn ghost open-modal-btn">Voir le projet</button>
-                        </div>
-                    </div>
-                    
-                    <div class="project-card" data-category="web"
-                        data-title="Projet - Chichats"
-                        data-description="Chichats - Application web de réservation pour un bar à chicha & chats à Paris. Les clients découvrent les services et réservent leurs tables, les gérants gèrent toutes les réservations via un dashboard intuitif. Créée avec PHP, MySQL, CSS et JavaScript pour une gestion complète des réservations (CRUD). Interface moderne avec recherche et modales pour éditer rapidement. Projet professionnel démontrant la conception d'une plateforme fonctionnelle de bout en bout."
-                        data-media="https://www.youtube.com/embed/dQw4w9WgXcQ, https://picsum.photos/seed/chichats/800/600, https://picsum.photos/seed/chichats2/800/600">
-                        <img src="https://picsum.photos/seed/chichats/400/300" alt="Chichats" class="project-image">
-                        <div class="project-overlay">
-                            <h3>Projet - Chichats</h3>
-                            <button class="btn ghost open-modal-btn">Voir le projet</button>
-                        </div>
-                    </div>
-
-                    <div class="project-card" data-category="web"
-                        data-title="Projet - Web_blog"
-                        data-description="Web_blog - Application web de blog personnel. Les utilisateurs peuvent créer, modifier et publier des articles. Les administrateurs peuvent gérer les utilisateurs et les contenus via un tableau de bord. Créée avec PHP, MySQL, CSS et JavaScript pour une expérience utilisateur fluide."
-                        data-media="https://picsum.photos/seed/webblog/800/600, https://picsum.photos/seed/webblog2/800/600">
-                        <img src="https://picsum.photos/seed/webblog/400/300" alt="Web_blog" class="project-image">
-                        <div class="project-overlay">
-                            <h3>Projet - Web_blog</h3>
-                            <button class="btn ghost open-modal-btn">Voir le projet</button>
-                        </div>
-                    </div>
-
-                    <div class="project-card" data-category="iot"
-                        data-title="Prototypage RFID"
-                        data-description="Projet de prototypage avec un lecteur RFID et une carte Arduino UNO pour le contrôle d'accès."
-                        data-media="https://picsum.photos/seed/rfid/800/600, https://picsum.photos/seed/rfid2/800/600">
-                        <img src="https://picsum.photos/seed/rfid/400/300" alt="Prototypage RFID" class="project-image">
-                        <div class="project-overlay">
-                            <h3>Prototypage RFID</h3>
-                            <button class="btn ghost open-modal-btn">Voir le projet</button>
-                        </div>
-                    </div>
-
-                    <div class="project-card" data-category="iot"
-                        data-title="Lecteur d'empreinte digitale"
-                        data-description="Intégration d'un capteur d'empreintes digitales AS608 pour un système de sécurité biométrique."
-                        data-media="https://picsum.photos/seed/fingerprint/800/600, https://picsum.photos/seed/fingerprint2/800/600">
-                        <img src="https://picsum.photos/seed/fingerprint/400/300" alt="Lecteur d'empreinte digitale" class="project-image">
-                        <div class="project-overlay">
-                            <h3>Lecteur d'empreinte digitale</h3>
-                            <button class="btn ghost open-modal-btn">Voir le projet</button>
-                        </div>
-                    </div>
-                    
-                    <div class="project-card" data-category="iot"
-                        data-title="Radar à ultrasons"
-                        data-description="Création d'un radar avec capteur à ultrasons et servomoteur, piloté par un ESP32 avec une interface web pour la visualisation."
-                        data-media="https://picsum.photos/seed/radar/800/600, https://picsum.photos/seed/radar2/800/600">
-                        <img src="https://picsum.photos/seed/radar/400/300" alt="Radar" class="project-image">
-                        <div class="project-overlay">
-                            <h3>Radar à ultrasons</h3>
-                            <button class="btn ghost open-modal-btn">Voir le projet</button>
-                        </div>
-                    </div>
-
+                    {% for projet in projets %}
+                        {% set mediaUrls = [] %}
+                        {% for media in projet.medias %}
+                            {% set mediaUrls = mediaUrls|merge([{
+                                url: path('app_projet_media', {id: media.id}),
+                                type: media.typeMime
+                            }]) %}
+                        {% endfor %}
+                        {% set premiereMedia = projet.medias|first %}
+                        <article class="project-card" data-category="{{ projet.categorie }}"
+                            data-title="{{ projet.titre }}"
+                            data-description="{{ projet.description }}{% if projet.technologies %}&#10;&#10;Technologies : {{ projet.technologies }}{% endif %}"
+                            data-media="{{ mediaUrls|json_encode|e('html_attr') }}">
+                            {% if premiereMedia %}
+                                {% if premiereMedia.video %}
+                                    <video class="project-image" muted playsinline preload="metadata" aria-label="Aperçu de {{ projet.titre }}">
+                                        <source src="{{ path('app_projet_media', {id: premiereMedia.id}) }}" type="{{ premiereMedia.typeMime }}">
+                                    </video>
+                                {% else %}
+                                    <img src="{{ path('app_projet_media', {id: premiereMedia.id}) }}" alt="{{ projet.titre }}" class="project-image">
+                                {% endif %}
+                            {% else %}
+                                <div class="project-image project-placeholder" aria-hidden="true"><i class="fa-solid fa-images"></i></div>
+                            {% endif %}
+                            <div class="project-overlay">
+                                <h3>{{ projet.titre }}</h3>
+                                <button class="btn ghost open-modal-btn" type="button">Voir le projet</button>
+                                {% if projet.lien %}
+                                    <a class="btn ghost" href="{{ projet.lien }}" target="_blank" rel="noopener noreferrer">Lien externe</a>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% else %}
+                        <p class="projects-empty">Les projets seront bientôt disponibles.</p>
+                    {% endfor %}
                 </div>
             </div>
+            <br><br>
 
-
-        <!-- Centres d’intérêt & qualités -->
-        <section class="section section-light">
+        <!-- Parcours & expériences -->
+        <section id="experience" class="section section-light">
             <div class="container hidden">
-                <div class="grid-2">
-                    <div>
-                        <h2 class="section-title">Soft-skills</h2>
-                        <ul class="pill-list">
-                            <li>Résolution de problèmes</li>
-                            <li>Travail d'équipe</li>
-                            <li>Communication</li>
-                            <li>Adaptabilité</li>
-                            <li>Autonomie</li>
-                            <li>Curiosité technique</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h2 class="section-title">Centres d’intérêt</h2>
-                        <ul class="pill-list">
-                            <li>Musique</li>
-                            <li>Basket-ball</li>
-                            <li>Voitures</li>
-    
-                            
-                        </ul>
-                    </div>
-</div>
+                <h2 class="section-title">Parcours & expériences</h2>
+                <div class="timeline">
+                    {% for p in parcours %}
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h3>{{ p.titre }}</h3>
+                                <p class="timeline-sub">
+                                    {{ p.debut|date('m/Y') }} – {{ p.fin|date('m/Y') }}
+                                    · <strong>{{ p.entite }}</strong> · {{ p.localisation }}
+                                </p>
+                                {% if stacksById[p.idStack] is defined %}
+                                    <ul class="pill-list">
+                                        <li>{{ stacksById[p.idStack].nom }}</li>
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <p>Le parcours sera bientôt renseigné.</p>
+                    {% endfor %}
+                </div>
             </div>
         </section>
+
+
 
         <!-- Contact -->
         <section id="contact" class="section section-contact">
             <div class="container hidden">
                 <h2 class="section-title section-title-center">Contact</h2>
                 <p class="contact-intro">
-                    Intéressé(e) par mon profil pour un stage, une alternance ou une collaboration sur un projet ?
-                    N’hésitez pas à me contacter.
+                    <i class="fa-solid fa-handshake" aria-hidden="true"></i>
+                    Je suis disponible pour un stage, une alternance ou une collaboration sur un projet.
+                    Écrivez-moi pour en discuter.
                 </p>
                 <div class="contact-grid">
                     <form class="contact-form" onsubmit="return false;">
                         <div class="contact-info">
-                          <p><i class="fa-solid fa-location-dot"></i><strong>Localisation :</strong> Valenciennes, France</p>
-                            <p><i class="fa-solid fa-envelope"></i><strong>Email :</strong> <a href="mailto:bokingodaniel4@gmail.com">bokingodaniel4@gmail.com</a></p>
-                            <p><i class="fa-brands fa-linkedin"></i><strong>LinkedIn :</strong> <a href="https://www.linkedin.com/in/daniel-bokingo-024415357/" target="_blank" rel="noopener noreferrer">
-                                danielbokingo.linkedln</a></p>
-                            <p><i class="fa-solid fa-phone"></i><strong>Téléphone :</strong> <a href="tel:+33759451864">+33 7 59 45 18 64</a></p>
+                                                    <p><i class="fa-solid fa-location-dot"></i><strong>Je suis basé à :</strong> Valenciennes, France</p>
+                                                        <p><i class="fa-solid fa-envelope"></i><strong>Mon email :</strong> <a href="mailto:bokingodaniel4@gmail.com">bokingodaniel4@gmail.com</a></p>
+                                                        <p><i class="fa-brands fa-linkedin"></i><strong>Mon profil LinkedIn :</strong> <a href="https://www.linkedin.com/in/daniel-bokingo-024415357/" target="_blank" rel="noopener noreferrer">
+                                danielbokingo.LinkedIn</a></p>
+                            <p><i class="fa-brands fa-github"></i><strong>Mon GitHub :</strong> <a href="https://github.com/BonkingoDaniel006" target="_blank" rel="noopener noreferrer">
+                                github.com/BonkingoDaniel006</a></p>
+                            <p><i class="fa-solid fa-phone"></i><strong>Mon téléphone :</strong> <a href="tel:+33759451864">+33 7 59 45 18 64</a></p>
                         </div>
                         
                         
@@ -297,32 +159,9 @@
         </section>
     </main>
 
-    <footer class="footer">
-        <p>© 2026 – Daniel Bokingo – Tous droits réservés</p>
+    {% include 'portfolio/footer.html.twig' %}
+    {% include 'portfolio/modal.html.twig' %}
 
-    </footer>
-
-    <!-- Modale Projet -->
-    <div id="project-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div class="modal-body">
-                <div class="modal-gallery">
-                    <div class="gallery-slider">
-                        <!-- Les médias (images/vidéos) seront injectés ici par JS -->
-                    </div>
-                    <button class="gallery-nav prev">&#10094;</button>
-                    <button class="gallery-nav next">&#10095;</button>
-                </div>
-                <div class="modal-description">
-                    <h3 id="modal-title">Titre du projet</h3>
-                    <p id="modal-text">Description détaillée du projet...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <a href="#top" class="back-to-top" aria-label="Retour en haut"><i class="fa-solid fa-arrow-up"></i></a>
-
-
-{% endblock %}
+    <script src="{{ asset('portfolio/script.js?v=project-crud-1') }}"></script>
+</body>
+</html>

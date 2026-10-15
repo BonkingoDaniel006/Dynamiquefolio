@@ -1,0 +1,353 @@
+document.addEventListener('DOMContentLoaded', async function() {
+    const includeTargets = Array.from(document.querySelectorAll('[data-include]'));
+
+    try {
+        await Promise.all(includeTargets.map(async target => {
+            const response = await fetch(target.dataset.include, { cache: 'no-cache' });
+            if (!response.ok) throw new Error(`Impossible de charger ${target.dataset.include}`);
+            const template = document.createElement('template');
+            template.innerHTML = await response.text();
+            target.replaceWith(template.content);
+        }));
+    } catch (error) {
+        document.body.innerHTML = '<main class="include-error"><h1>Impossible de charger la page</h1><p>Ouvre le portfolio avec un serveur local (par exemple Live Server dans VS Code), pas directement avec file://.</p></main>';
+        console.error(error);
+        return;
+    }
+
+    const navToggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    const projectFilterRoot = document.querySelector('.project-nav');
+    const projectCards = Array.from(document.querySelectorAll('.projects-grid .project-card'));
+    const skillFilterRoot = document.querySelector('.skill-filter-nav');
+    const skillCards = Array.from(document.querySelectorAll('.skills-grid-new .skill-item'));
+    const skillCategories = [
+        { label: 'Front', value: 'front', pattern: /html|css|javascript|typescript|react|vue|angular|bootstrap/ },
+        { label: 'Back', value: 'back', pattern: /python|django|flask|php|symfony|pygame|node|laravel|java|ruby/ },
+        { label: 'BDD', value: 'bdd', pattern: /mysql|postgres|database|phpmyadmin|mongodb|sqlite|oracle/ },
+        { label: 'DevOps', value: 'devops', pattern: /linux|ubuntu|debian|git|docker|proxmox|vmware|server|devops/ },
+        { label: 'IoT & embarqué', value: 'iot', pattern: /cplusplus|c\+\+|arduino|esp32|rfid|\biot\b/ }
+    ];
+
+    function getSkillCategory(skill) {
+        const identifiers = `${skill.textContent} ${skill.querySelector('i')?.className ?? ''}`.toLowerCase();
+        return skillCategories.find(category => category.pattern.test(identifiers))?.value ?? 'other';
+    }
+
+    const availableSkillCategories = new Set(skillCards.map(getSkillCategory));
+    const projectFilterChoices = [
+        { label: 'Tous', value: 'all' },
+        { label: 'Web & desktop', value: 'web-desktop' },
+        { label: 'IoT', value: 'iot' }
+    ];
+    const skillFilterChoices = [
+        { label: 'Toutes', value: 'all' },
+        ...skillCategories
+            .filter(category => availableSkillCategories.has(category.value))
+            .map(({ label, value }) => ({ label, value })),
+        ...(availableSkillCategories.has('other') ? [{ label: 'Autres', value: 'other' }] : [])
+    ];
+
+    navToggle.addEventListener('click', () => {
+        const isOpen = navLinks.classList.toggle('open');
+        navToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navLinks.classList.remove('open');
+            navToggle.setAttribute('aria-expanded', 'false');
+        });
+    });
+
+    function matchesProjectFilter(card, filter) {
+        const category = card.dataset.category;
+        return filter === 'all' ||
+            (filter === 'web-desktop' && ['web', 'desktop'].includes(category)) ||
+            (filter === 'iot' && category === 'iot');
+    }
+
+    function matchesSkillFilter(skill, filter) {
+        return filter === 'all' || getSkillCategory(skill) === filter;
+    }
+
+    function renderFallbackFilters(root, items, choices, matchesFilter, noun) {
+        let activeFilter = 'all';
+        const group = document.createElement('div');
+        group.className = 'project-filters';
+        group.setAttribute('role', 'group');
+        group.setAttribute('aria-label', root.getAttribute('aria-label'));
+        const count = document.createElement('p');
+        count.className = 'filter-count';
+        count.setAttribute('aria-live', 'polite');
+
+        function updateFilters() {
+            const visibleCount = items.filter(item => matchesFilter(item, activeFilter)).length;
+            items.forEach(item => { item.hidden = !matchesFilter(item, activeFilter); });
+            group.querySelectorAll('button').forEach(button => {
+                const isActive = button.dataset.filter === activeFilter;
+                button.classList.toggle('active', isActive);
+                button.setAttribute('aria-pressed', String(isActive));
+            });
+            count.textContent = `${visibleCount} ${noun}`;
+        }
+
+        choices.forEach(choice => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'filter-button';
+            button.dataset.filter = choice.value;
+            button.textContent = choice.label;
+            button.addEventListener('click', () => {
+                activeFilter = choice.value;
+                updateFilters();
+            });
+            group.appendChild(button);
+        });
+
+        root.replaceChildren(group, count);
+        updateFilters();
+    }
+
+    function mountReactFilters() {
+        function Filters({ items, choices, matchesFilter, noun, groupLabel }) {
+            const [activeFilter, setActiveFilter] = React.useState('all');
+            const visibleCount = items.filter(item => matchesFilter(item, activeFilter)).length;
+
+            React.useEffect(() => {
+                items.forEach(item => { item.hidden = !matchesFilter(item, activeFilter); });
+            }, [items, matchesFilter, activeFilter]);
+
+            return React.createElement(React.Fragment, null,
+                React.createElement('div', {
+                    className: 'project-filters',
+                    role: 'group',
+                    'aria-label': groupLabel
+                }, choices.map(choice => React.createElement('button', {
+                    key: choice.value,
+                    type: 'button',
+                    className: `filter-button${activeFilter === choice.value ? ' active' : ''}`,
+                    'aria-pressed': activeFilter === choice.value,
+                    onClick: () => setActiveFilter(choice.value)
+                }, choice.label))),
+                React.createElement('p', { className: 'filter-count', 'aria-live': 'polite' },
+                    `${visibleCount} ${noun}`)
+            );
+        }
+
+        if (projectFilterRoot && projectCards.length) {
+            ReactDOM.createRoot(projectFilterRoot).render(React.createElement(Filters, {
+                items: projectCards,
+                choices: projectFilterChoices,
+                matchesFilter: matchesProjectFilter,
+                noun: 'projets',
+                groupLabel: 'Filtrer les projets'
+            }));
+        }
+        if (skillFilterRoot && skillCards.length) {
+            ReactDOM.createRoot(skillFilterRoot).render(React.createElement(Filters, {
+                items: skillCards,
+                choices: skillFilterChoices,
+                matchesFilter: matchesSkillFilter,
+                noun: 'compétences',
+                groupLabel: 'Filtrer les compétences'
+            }));
+        }
+    }
+
+    function loadScript(url) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = url;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    if (projectCards.length || skillCards.length) {
+        loadScript('https://unpkg.com/react@18/umd/react.production.min.js')
+            .then(() => loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js'))
+            .then(mountReactFilters)
+            .catch(() => {
+                if (projectFilterRoot && projectCards.length) {
+                    renderFallbackFilters(projectFilterRoot, projectCards, projectFilterChoices, matchesProjectFilter, 'projets');
+                }
+                if (skillFilterRoot && skillCards.length) {
+                    renderFallbackFilters(skillFilterRoot, skillCards, skillFilterChoices, matchesSkillFilter, 'compétences');
+                }
+            });
+    }
+
+    const modal = document.getElementById('project-modal');
+    const openModalButtons = document.querySelectorAll('.open-modal-btn');
+    const closeModal = document.querySelector('.close-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalText = document.getElementById('modal-text');
+    const gallerySlider = document.querySelector('.gallery-slider');
+    const prevBtn = document.querySelector('.gallery-nav.prev');
+    const nextBtn = document.querySelector('.gallery-nav.next');
+    let currentSlide = 0;
+    let slides = [];
+    let lastFocusedElement = null;
+
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'modal-title');
+    closeModal.setAttribute('role', 'button');
+    closeModal.setAttribute('tabindex', '0');
+    closeModal.setAttribute('aria-label', 'Fermer la fenêtre du projet');
+
+    function showSlide(index) {
+        if (slides.length === 0) {
+            currentSlide = 0;
+            gallerySlider.style.transform = '';
+            prevBtn.hidden = true;
+            nextBtn.hidden = true;
+            return;
+        }
+        currentSlide = index;
+        gallerySlider.style.transform = `translateX(-${index * 100}%)`;
+        prevBtn.hidden = index === 0;
+        nextBtn.hidden = index === slides.length - 1;
+    }
+
+    function closeModalFunction() {
+        modal.classList.remove('visible');
+        document.body.classList.remove('modal-open');
+        gallerySlider.querySelectorAll('iframe').forEach(iframe => { iframe.src = iframe.src; });
+        gallerySlider.querySelectorAll('video').forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+        });
+        if (lastFocusedElement) lastFocusedElement.focus();
+    }
+
+    openModalButtons.forEach(button => {
+        button.addEventListener('click', event => {
+            event.stopPropagation();
+            const card = button.closest('.project-card');
+            lastFocusedElement = button;
+            modalTitle.textContent = card.dataset.title;
+            modalText.textContent = card.dataset.description;
+            const mediaValue = card.dataset.media;
+            const mediaUrls = mediaValue.startsWith('[')
+                ? JSON.parse(mediaValue)
+                : mediaValue.split(',').map(url => url.trim()).filter(Boolean);
+            slides = mediaUrls.map(entry => {
+                const media = typeof entry === 'string' ? { url: entry, type: '' } : entry;
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                if (media.url.includes('youtube.com/embed')) {
+                    const frame = document.createElement('iframe');
+                    frame.src = media.url;
+                    frame.title = `Vidéo : ${card.dataset.title}`;
+                    frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                    frame.allowFullscreen = true;
+                    item.appendChild(frame);
+                } else if (media.type.startsWith('video/') || /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(media.url)) {
+                    const video = document.createElement('video');
+                    video.src = media.url;
+                    video.controls = true;
+                    video.playsInline = true;
+                    video.preload = 'metadata';
+                    item.appendChild(video);
+                } else {
+                    const image = document.createElement('img');
+                    image.src = media.url;
+                    image.alt = card.dataset.title;
+                    item.appendChild(image);
+                }
+                return item;
+            });
+
+            if (slides.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'gallery-empty';
+                empty.textContent = 'Aucun média pour ce projet.';
+                gallerySlider.replaceChildren(empty);
+            } else {
+                gallerySlider.replaceChildren(...slides);
+            }
+            showSlide(0);
+            modal.classList.add('visible');
+            document.body.classList.add('modal-open');
+            closeModal.focus();
+        });
+    });
+
+    closeModal.addEventListener('click', closeModalFunction);
+    closeModal.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            closeModalFunction();
+        }
+    });
+    modal.addEventListener('click', event => {
+        if (event.target === modal) closeModalFunction();
+    });
+    nextBtn.addEventListener('click', () => {
+        if (currentSlide < slides.length - 1) showSlide(currentSlide + 1);
+    });
+    prevBtn.addEventListener('click', () => {
+        if (currentSlide > 0) showSlide(currentSlide - 1);
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            navLinks.classList.remove('open');
+            navToggle.setAttribute('aria-expanded', 'false');
+            if (modal.classList.contains('visible')) closeModalFunction();
+        }
+        if (modal.classList.contains('visible') && event.key === 'ArrowRight' && currentSlide < slides.length - 1) {
+            showSlide(currentSlide + 1);
+        }
+        if (modal.classList.contains('visible') && event.key === 'ArrowLeft' && currentSlide > 0) {
+            showSlide(currentSlide - 1);
+        }
+    });
+
+    const hiddenElements = document.querySelectorAll('.hidden');
+    const revealItems = [];
+    const revealSelectors = '.skill-item, .project-card, .timeline-item, .pill-list li';
+
+    hiddenElements.forEach(container => {
+        container.querySelectorAll(revealSelectors).forEach((item, index) => {
+            item.classList.add('reveal-item');
+            item.style.setProperty('--reveal-delay', `${Math.min(index % 8 * 55, 385)}ms`);
+            revealItems.push(item);
+        });
+    });
+
+    if ('IntersectionObserver' in window) {
+        const sectionObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                    sectionObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.08 });
+        const itemObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-in');
+                    itemObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+
+        hiddenElements.forEach(element => sectionObserver.observe(element));
+        revealItems.forEach(item => itemObserver.observe(item));
+    } else {
+        hiddenElements.forEach(element => element.classList.add('show'));
+        revealItems.forEach(item => item.classList.add('reveal-in'));
+    }
+
+    const backToTopButton = document.querySelector('.back-to-top');
+    function updateBackToTop() {
+        backToTopButton.classList.toggle('visible', window.scrollY > 300);
+    }
+    window.addEventListener('scroll', updateBackToTop, { passive: true });
+    updateBackToTop();
+});

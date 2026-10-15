@@ -1,0 +1,48 @@
+<header class="hero" id="top">
+    <nav class="navbar">
+        <div class="logo">D<span>B</span></div>
+        <ul class="nav-links">
+            {% if profil is defined and profil and (profil.aboutMe or profil.objectif) %}
+                <li><a href="#about">À propos</a></li>
+            {% endif %}
+            <li><a href="#skills">Compétences</a></li>
+            <li><a href="#projects">Projets</a></li>
+            <li><a href="#experience">Expériences</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <div class="hero-content">
+        {% if profil is defined and profil %}
+            {% if profil.photo %}
+                {% set photoPath = profil.photo starts with 'portfolio/' ? profil.photo : 'portfolio/' ~ profil.photo %}
+                <div class="hero-image">
+                    <img src="{{ photoPath starts with 'http://' or photoPath starts with 'https://' ? photoPath : asset(photoPath) }}" alt="Photo de {{ profil.prenom }} {{ profil.nom }}">
+                </div>
+            {% endif %}
+            <div class="hero-text hidden">
+                <p class="hero-tagline"><i class="fa-solid fa-code" aria-hidden="true"></i> {{ profil.titre }}</p>
+                <p class="hero-tagline"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> J’étudie à <strong>{{ profil.etablissement }}</strong></p>
+                <h1>{{ profil.prenom }} <span>{{ profil.nom }}</span></h1>
+                <p class="hero-subtitle">{{ profil.bio|nl2br }}</p>
+                {% if profil.disponibilite %}
+                    <p class="availability-status {{ 'disponible' in profil.disponibilite|lower and 'indisponible' not in profil.disponibilite|lower ? 'is-available' : 'is-unavailable' }}" role="status">
+                        <span class="availability-dot" aria-hidden="true"></span>
+                        {{ profil.disponibilite }}
+                    </p>
+                {% endif %}
+                <div class="hero-actions">
+                    <a href="#contact" class="btn primary">Me contacter</a>
+                    <a href="#skills" class="btn ghost">Voir mes compétences</a>
+                    {% if profil.cv %}
+                        {% set cvPath = profil.cv starts with 'portfolio/' ? profil.cv : 'portfolio/' ~ profil.cv %}
+                        <a href="{{ cvPath starts with 'http://' or cvPath starts with 'https://' ? cvPath : asset(cvPath) }}" class="btn ghost" download> Télécharger CV</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</header>

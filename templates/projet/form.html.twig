@@ -1,0 +1,74 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}{{ pageTitle }} – Portfolio Admin{% endblock %}
+
+{% block body %}
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ asset('styles/dashboard.css') }}">
+    {% endblock %}
+
+    <main class="dashboard-shell">
+        <section class="main-panel">
+            <header class="topbar">
+                <div class="topbar-kicker">Dashboard / Gestion des projets</div>
+                <div class="nav-actions">
+                    <a href="{{ path('dashboard') }}">Retour au dashboard</a>
+                </div>
+            </header>
+
+            <div class="main-content">
+                <div class="page-header">
+                    <h1>{{ pageTitle }}</h1>
+                    <p>Les médias envoyés seront rangés dans un dossier propre au projet sous <code>medias/</code>.</p>
+                </div>
+
+                <div class="form-card project-form-card">
+                    {{ form_start(form, {attr: {class: 'project-form', enctype: 'multipart/form-data'}}) }}
+                        {{ form_errors(form) }}
+                        {{ form_row(form.titre, {attr: {class: 'form-control'}, row_attr: {class: 'form-group'}}) }}
+                        {{ form_row(form.categorie, {attr: {class: 'form-control'}, row_attr: {class: 'form-group'}}) }}
+                        {{ form_row(form.description, {attr: {class: 'form-control'}, row_attr: {class: 'form-group'}}) }}
+                        {{ form_row(form.technologies, {attr: {class: 'form-control'}, row_attr: {class: 'form-group'}}) }}
+                        {{ form_row(form.lien, {attr: {class: 'form-control'}, row_attr: {class: 'form-group'}}) }}
+                        {{ form_row(form.fichiers, {attr: {class: 'form-control'}, row_attr: {class: 'form-group'}}) }}
+
+                        <div class="dashboard-modal-actions">
+                            <a class="btn btn-gray" href="{{ path('dashboard') }}">Annuler</a>
+                            <button class="btn btn-black" type="submit">{{ projet.id ? 'Enregistrer les modifications' : 'Créer le projet' }}</button>
+                        </div>
+                    {{ form_end(form) }}
+
+                        {% if projet.id %}
+                            <section class="project-existing-media">
+                                <h2>Médias existants</h2>
+                                {% if projet.medias|length %}
+                                    <div class="project-media-list">
+                                        {% for media in projet.medias %}
+                                            <article class="project-media-item">
+                                                {% if media.video %}
+                                                    <video controls preload="metadata">
+                                                        <source src="{{ path('app_projet_media', {id: media.id}) }}" type="{{ media.typeMime }}">
+                                                    </video>
+                                                {% else %}
+                                                    <img src="{{ path('app_projet_media', {id: media.id}) }}" alt="{{ media.nomOriginal }}">
+                                                {% endif %}
+                                                <div>
+                                                    <span>{{ media.nomOriginal }}</span>
+                                                    <form action="{{ path('app_projet_media_delete', {id: projet.id, mediaId: media.id}) }}" method="post" onsubmit="return confirm('Supprimer ce média ?');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_project_media_' ~ media.id) }}">
+                                                        <button class="btn btn-danger" type="submit">Supprimer le média</button>
+                                                    </form>
+                                                </div>
+                                            </article>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p>Aucun média n’est encore associé à ce projet.</p>
+                                {% endif %}
+                            </section>
+                        {% endif %}
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock %}

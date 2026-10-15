@@ -54,6 +54,12 @@
             </header>
 
             <main class="main-content">
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="dashboard-flash dashboard-flash-{{ label }}" role="status">{{ message }}</div>
+                    {% endfor %}
+                {% endfor %}
+
                 <div class="hero-row">
                     <div class="hero-block">
                         <div class="hero-badge"><i class="fa-solid fa-sparkles"></i></div>
@@ -63,9 +69,9 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-black" style="width: auto; padding: 12px 18px;" onclick="toggleNewProjectForm()">
+                    <a class="btn btn-black" style="width: auto; padding: 12px 18px;" href="{{ path('app_projet_new') }}">
                         <i class="fa-solid fa-plus"></i> Ajouter un projet
-                    </button>
+                    </a>
                 </div>
 
                 <div class="stats-grid">
@@ -74,7 +80,7 @@
                             <div class="stat-icon"><i class="fa-solid fa-diagram-project"></i></div>
                             <div class="stat-pill">+12%</div>
                         </div>
-                        <div class="value">08</div>
+                        <div class="value">{{ projets|length }}</div>
                         <div class="label">Projets actifs</div>
                     </div>
 
@@ -109,102 +115,75 @@
                 <section id="projects" class="section-pane active">
                     <div class="page-header">
                         <h1>Gestion des Projets</h1>
-                        <p>Retrouvez tous vos projets, suivez leur déploiement et accédez à leur configuration.</p>
+                        <p>Ajoutez, modifiez et supprimez les projets publiés dans votre portfolio.</p>
                     </div>
 
                     <div class="list-grid">
                         <div>
-                            <div id="new-project-card" class="form-card" style="display: none; margin-bottom: 18px;">
-                                <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 20px;">Nouveau Projet</h3>
-                                <form onsubmit="addProject(event)">
-                                    <div class="form-group">
-                                        <label>Titre du projet</label>
-                                        <input type="text" id="p-title" class="form-control" placeholder="ex: Elikya Marketplace" required>
+                            {% for projet in projets %}
+                                {% set premiereMedia = projet.medias|first %}
+                                <article class="card-item">
+                                    <div class="card-media">
+                                        {% if premiereMedia %}
+                                            {% if premiereMedia.video %}
+                                                <i class="fa-solid fa-film" aria-label="Vidéo"></i>
+                                            {% else %}
+                                                <img src="{{ path('app_projet_media', {id: premiereMedia.id}) }}" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="fa-solid fa-images"></i>
+                                        {% endif %}
                                     </div>
-                                    <div class="form-group">
-                                        <label>Stack Technique</label>
-                                        <input type="text" id="p-tech" class="form-control" placeholder="Flask, MySQL, Docker" required>
+                                    <div class="card-body">
+                                        <div class="card-ref">Projet n° {{ projet.id }} · {{ projet.categorie|upper }}</div>
+                                        <h2 class="card-title">{{ projet.titre }}</h2>
+                                        <p>{{ projet.description|slice(0, 180) }}{% if projet.description|length > 180 %}…{% endif %}</p>
+                                        {% if projet.technologies %}
+                                            <p><strong>Technologies :</strong> {{ projet.technologies }}</p>
+                                        {% endif %}
+                                        <p>{{ projet.medias|length }} média(s)</p>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Description</label>
-                                        <textarea id="p-desc" class="form-control" required></textarea>
+                                    <div class="card-actions">
+                                        <a class="btn btn-black" href="{{ path('app_projet_edit', {id: projet.id}) }}">Modifier</a>
+                                        {% if projet.lien %}
+                                            <a class="btn btn-outline" href="{{ projet.lien }}" target="_blank" rel="noopener noreferrer">Voir le projet</a>
+                                        {% endif %}
+                                        <button class="btn btn-danger" type="button" onclick="openProjectDeleteConfirm({{ projet.id }})">Supprimer</button>
                                     </div>
-                                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                                        <button type="button" class="btn btn-gray" style="width: auto;" onclick="toggleNewProjectForm()">Annuler</button>
-                                        <button type="submit" class="btn btn-black" style="width: auto;">Enregistrer</button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <div class="card-item">
-                                <div class="card-media">
-                                    <i class="fa-solid fa-store"></i>
-                                </div>
-                                <div class="card-body">
-                                    <div class="card-ref">Projet n° 85737295</div>
-                                    <div class="card-title">Elikya — Marketplace e-Commerce</div>
-
-                                    <div class="tracker">
-                                        <div class="tracker-line"></div>
-                                        <div class="tracker-line-fill" style="width: 100%;"></div>
-                                        <div class="tracker-step">
-                                            <div class="dot active"></div>
-                                            <div class="step-label">Développement</div>
-                                            <div class="step-sub">30/08/2026</div>
-                                        </div>
-                                        <div class="tracker-step">
-                                            <div class="dot active"></div>
-                                            <div class="step-label">Tests</div>
-                                            <div class="step-sub">31/08/2026</div>
-                                        </div>
-                                        <div class="tracker-step">
-                                            <div class="dot active"></div>
-                                            <div class="step-label">En ligne</div>
-                                            <div class="step-sub">Render</div>
+                                </article>
+                                <div id="project-delete-confirm-{{ projet.id }}" class="dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="project-delete-confirm-title-{{ projet.id }}" hidden>
+                                    <div class="dashboard-modal-content dashboard-result-modal">
+                                        <div class="dashboard-result-icon is-warning" aria-hidden="true">!</div>
+                                        <h2 id="project-delete-confirm-title-{{ projet.id }}">Supprimer ce projet ?</h2>
+                                        <p class="dashboard-modal-intro">« {{ projet.titre }} » et ses médias seront supprimés définitivement. Voulez-vous continuer ?</p>
+                                        <div class="dashboard-modal-actions">
+                                            <button class="btn btn-gray" type="button" onclick="closeProjectDeleteConfirm({{ projet.id }})">Annuler</button>
+                                            <button class="btn btn-danger" type="button" onclick="openProjectDeletePassword({{ projet.id }})">Continuer</button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-actions">
-                                    <button class="btn btn-black" onclick="showToast('Ouverture de l\'éditeur de projet...')">Modifier</button>
-                                    <button class="btn btn-gray" onclick="showToast('Synchronisation Git lancée...')">Commits</button>
-                                    <button class="btn btn-outline" onclick="showToast('Lien démo copié')">Démo</button>
-                                </div>
-                            </div>
-
-                            <div class="card-item">
-                                <div class="card-media">
-                                    <i class="fa-solid fa-microchip"></i>
-                                </div>
-                                <div class="card-body">
-                                    <div class="card-ref">Projet n° 85737294</div>
-                                    <div class="card-title">AUTISAFE — Bracelet connecté & QR Code d'urgence</div>
-
-                                    <div class="tracker">
-                                        <div class="tracker-line"></div>
-                                        <div class="tracker-line-fill" style="width: 50%;"></div>
-                                        <div class="tracker-step">
-                                            <div class="dot active"></div>
-                                            <div class="step-label">Conception</div>
-                                            <div class="step-sub">Effectué</div>
-                                        </div>
-                                        <div class="tracker-step">
-                                            <div class="dot active"></div>
-                                            <div class="step-label">Prototype</div>
-                                            <div class="step-sub">En cours</div>
-                                        </div>
-                                        <div class="tracker-step">
-                                            <div class="dot"></div>
-                                            <div class="step-label">Déploiement</div>
-                                            <div class="step-sub">À venir</div>
-                                        </div>
+                                <div id="project-delete-password-{{ projet.id }}" class="dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="project-delete-password-title-{{ projet.id }}" hidden>
+                                    <div class="dashboard-modal-content">
+                                        <h2 id="project-delete-password-title-{{ projet.id }}">Confirmez votre identité</h2>
+                                        <p class="dashboard-modal-intro">Saisissez votre mot de passe pour supprimer « {{ projet.titre }} ».</p>
+                                        <form action="{{ path('app_projet_delete', {id: projet.id}) }}" method="post">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_project_' ~ projet.id) }}">
+                                            <div class="form-group">
+                                                <label for="project-delete-password-input-{{ projet.id }}">Mot de passe</label>
+                                                <input id="project-delete-password-input-{{ projet.id }}" class="form-control" type="password" name="password" autocomplete="current-password" required>
+                                            </div>
+                                            <div class="dashboard-modal-actions">
+                                                <button class="btn btn-gray" type="button" onclick="closeProjectDeletePassword({{ projet.id }})">Annuler</button>
+                                                <button class="btn btn-danger" type="submit">Confirmer la suppression</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
-                                <div class="card-actions">
-                                    <button class="btn btn-black" onclick="showToast('Édition du prototype...')">Modifier</button>
-                                    <button class="btn btn-gray">Suivre</button>
-                                    <button class="btn btn-outline">Spécifications</button>
+                            {% else %}
+                                <div class="form-card">
+                                    <p>Aucun projet n’est enregistré. Ajoutez votre premier projet pour le publier sur la vitrine.</p>
                                 </div>
-                            </div>
+                            {% endfor %}
                         </div>
 
                         <div>
@@ -443,9 +422,25 @@
             document.getElementById(tabId).classList.add('active');
         }
 
-        function toggleNewProjectForm() {
-            const card = document.getElementById('new-project-card');
-            card.style.display = card.style.display === 'none' ? 'block' : 'none';
+        function openProjectDeleteConfirm(id) {
+            document.getElementById(`project-delete-confirm-${id}`).hidden = false;
+        }
+
+        function closeProjectDeleteConfirm(id) {
+            document.getElementById(`project-delete-confirm-${id}`).hidden = true;
+        }
+
+        function openProjectDeletePassword(id) {
+            closeProjectDeleteConfirm(id);
+            const modal = document.getElementById(`project-delete-password-${id}`);
+            modal.hidden = false;
+            modal.querySelector('input[type="password"]').focus();
+        }
+
+        function closeProjectDeletePassword(id) {
+            const modal = document.getElementById(`project-delete-password-${id}`);
+            modal.hidden = true;
+            modal.querySelector('input[type="password"]').value = '';
         }
 
         function showToast(message) {
@@ -566,11 +561,6 @@
             }
         }
 
-        function addProject(e) {
-            e.preventDefault();
-            showToast("Nouveau projet enregistré avec succès !");
-            toggleNewProjectForm();
-        }
     </script>
 
 {% endblock %}

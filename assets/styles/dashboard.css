@@ -649,6 +649,80 @@
             background: #FFFFFF;
         }
 
+        .dashboard-flash {
+            margin-bottom: 18px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            background: #E8F6EE;
+            color: #1E7042;
+        }
+
+        .dashboard-flash-error {
+            background: #FFF0EE;
+            color: #A52D25;
+        }
+
+        .project-form-card {
+            width: min(900px, 100%);
+        }
+
+        .project-form .form-group > div {
+            display: grid;
+            gap: 8px;
+        }
+
+        .project-form .form-group ul {
+            padding-left: 20px;
+            color: #A52D25;
+        }
+
+        .project-existing-media {
+            margin-top: 28px;
+        }
+
+        .project-existing-media h2 {
+            margin-bottom: 14px;
+            font-size: 1.1rem;
+        }
+
+        .project-media-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .project-media-item {
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            background: var(--bg-card);
+        }
+
+        .project-media-item > img,
+        .project-media-item > video {
+            display: block;
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            background: #111;
+        }
+
+        .project-media-item > div {
+            display: grid;
+            gap: 10px;
+            padding: 12px;
+        }
+
+        .project-media-item span {
+            overflow-wrap: anywhere;
+            font-size: 0.85rem;
+        }
+
+        .dashboard-flash-success {
+            background: #E8F6EE;
+            color: #1E7042;
+        }
+
         textarea.form-control {
             resize: vertical;
             min-height: 100px;
